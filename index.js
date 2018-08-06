@@ -15,9 +15,9 @@ module.exports = (fn, { maxFailCount = 5, resetTimeout = 10 } = {}) => {
     }
   }
 
-  const call = args => {
+  const call = async args => {
     try {
-      const res = fn.apply(null, args)
+      const res = await fn.apply(null, args)
       failCounter = 0
       lastFailTime = 0
       return res
@@ -28,14 +28,14 @@ module.exports = (fn, { maxFailCount = 5, resetTimeout = 10 } = {}) => {
     }
   }
 
-  return (...args) => {
+  return async (...args) => {
     switch (state()) {
       case 'half':
       case 'closed':
         return call(args)
         break
 
-      case 'opened':
+      default:
         throw new Error('Circuit opened')
     }
   }

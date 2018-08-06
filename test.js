@@ -1,5 +1,5 @@
 const breaker = require('./index')
-const { deepStrictEqual: equal, throws } = require('assert')
+const { deepStrictEqual: equal, rejects } = require('assert')
 
 const wait = timeout => new Promise(resolve => setTimeout(resolve, timeout))
 
@@ -16,36 +16,36 @@ const fnFaker = n => {
 const run = async () => {
   // basic return
   let fn = breaker(() => 3)
-  equal(fn(), 3)
+  equal(await fn(), 3)
 
   // complex return
   fn = breaker(() => ({ a: true, b: 7 }))
-  equal(fn(), { a: true, b: 7 })
+  equal(await fn(), { a: true, b: 7 })
 
-  // throws error
+  // rejects with error
   fn = breaker(() => {
     throw new Error('bork')
   })
-  throws(fn, ({ message }) => message === 'bork')
+  rejects(fn, ({ message }) => message === 'bork')
 
   // 5 errors opens circuit
-  throws(fn, ({ message }) => message === 'bork') // 2nd
-  throws(fn, ({ message }) => message === 'bork')
-  throws(fn, ({ message }) => message === 'bork')
-  throws(fn, ({ message }) => message === 'bork')
-  throws(fn, ({ message }) => message === 'Circuit opened')
+  rejects(fn, ({ message }) => message === 'bork') // 2nd
+  rejects(fn, ({ message }) => message === 'bork')
+  rejects(fn, ({ message }) => message === 'bork')
+  rejects(fn, ({ message }) => message === 'bork')
+  rejects(fn, ({ message }) => message === 'Circuit opened')
 
   // success resets fail counter
   fn = breaker(fnFaker(3))
-  throws(fn, ({ message }) => message === 'fail')
-  throws(fn, ({ message }) => message === 'fail')
-  equal(fn(), 'success')
-  throws(fn, ({ message }) => message === 'fail')
-  throws(fn, ({ message }) => message === 'fail')
-  throws(fn, ({ message }) => message === 'fail')
-  throws(fn, ({ message }) => message === 'fail')
-  throws(fn, ({ message }) => message === 'fail')
-  throws(fn, ({ message }) => message === 'Circuit opened')
+  rejects(fn, ({ message }) => message === 'fail')
+  rejects(fn, ({ message }) => message === 'fail')
+  equal(await fn(), 'success')
+  rejects(fn, ({ message }) => message === 'fail')
+  rejects(fn, ({ message }) => message === 'fail')
+  rejects(fn, ({ message }) => message === 'fail')
+  rejects(fn, ({ message }) => message === 'fail')
+  rejects(fn, ({ message }) => message === 'fail')
+  rejects(fn, ({ message }) => message === 'Circuit opened')
 
   // after timeout, will half open circuit
   fn = breaker(
@@ -54,13 +54,20 @@ const run = async () => {
     },
     { maxFailCount: 3, resetTimeout: 1 }
   )
-  throws(fn, ({ message }) => message === 'burp')
-  throws(fn, ({ message }) => message === 'burp')
-  throws(fn, ({ message }) => message === 'burp')
-  throws(fn, ({ message }) => message === 'Circuit opened')
+  rejects(fn, ({ message }) => message === 'burp')
+  rejects(fn, ({ message }) => message === 'burp')
+  rejects(fn, ({ message }) => message === 'burp')
+  rejects(fn, ({ message }) => message === 'Circuit opened')
   await wait(1001)
-  throws(fn, ({ message }) => message === 'burp')
-  throws(fn, ({ message }) => message === 'Circuit opened')
+  rejects(fn, ({ message }) => message === 'burp')
+  rejects(fn, ({ message }) => message === 'Circuit opened')
+
+  // async
+  fn = breaker(async () => {
+    await wait(3)
+    throw new Error('yo')
+  })
+  rejects(fn, ({ message }) => message === 'yo')
 
   console.log('All good ✓')
 }
