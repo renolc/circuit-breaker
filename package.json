@@ -1,12 +1,23 @@
 {
   "name": "node-breaker",
   "version": "1.0.0",
-  "description": "",
+  "description": "A configurable implementation of the reset circuit breaker pattern",
   "main": "index.js",
   "scripts": {
     "test": "node test.js"
   },
-  "keywords": [],
+  "keywords": [
+    "reset",
+    "circuit",
+    "breaker"
+  ],
   "author": "Phillip Gibson <gibson.phillip.j@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/renolc/node-breaker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/renolc/node-breaker/issues"
+  }
 }
