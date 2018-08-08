@@ -1,6 +1,6 @@
 {
   "name": "node-breaker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A configurable implementation of the reset circuit breaker pattern",
   "main": "index.js",
   "scripts": {
